@@ -12,6 +12,7 @@ android.api = 31
 android.minapi = 24
 android.ndk = 25c
 android.sdk = 31
+android.bootstrap = webview
 android.gradle_dependencies = org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly
 fullscreen = 0
 [buildozer]

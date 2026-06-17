@@ -3,11 +3,12 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:
+  workflow_dispatch:   # позволяет запускать вручную
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -19,18 +20,38 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3-pip python3-dev git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          sudo apt install -y python3-pip python3-dev git zip unzip openjdk-17-jdk \
+            autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
+            libtinfo5 cmake libffi-dev libssl-dev
 
       - name: Install Buildozer
         run: |
           pip install --upgrade cython buildozer
 
+      # ---------- Главный фокус: готовим python-for-android сами ----------
+      - name: Clone python-for-android and patch bootstrap
+        run: |
+          P4A_DIR="$HOME/.buildozer/android/platform/python-for-android"
+
+          # Клонируем свежую develop-ветку (если папка уже есть — не страшно, удалим)
+          rm -rf "$P4A_DIR"
+          git clone --depth=1 --branch develop https://github.com/kivy/python-for-android.git "$P4A_DIR"
+
+          # Убираем libthorvg из bootstrap sdl2 (он нам не нужен)
+          BOOTSTRAP_FILE="$P4A_DIR/pythonforandroid/bootstraps/sdl2/__init__.py"
+          if [ -f "$BOOTSTRAP_FILE" ]; then
+            sed -i "s/'libthorvg',//g" "$BOOTSTRAP_FILE"
+            echo "Removed libthorvg from sdl2 bootstrap"
+          fi
+
+      # ---------- Теперь запускаем Buildozer ----------
       - name: Build APK
         run: |
           cd $GITHUB_WORKSPACE
           echo y | buildozer -v android debug
         timeout-minutes: 120
 
+      # ---------- Сохраняем артефакт ----------
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:

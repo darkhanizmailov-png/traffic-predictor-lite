@@ -27,15 +27,6 @@ jobs:
         run: |
           pip install --upgrade cython buildozer
 
-      - name: Clone python-for-android and remove libthorvg
-        run: |
-          P4A_DIR="$HOME/.buildozer/android/platform/python-for-android"
-          rm -rf "$P4A_DIR"
-          git clone --depth=1 --branch develop https://github.com/kivy/python-for-android.git "$P4A_DIR"
-          # Убираем libthorvg из bootstrap sdl2
-          sed -i "s/'libthorvg',//g" "$P4A_DIR/pythonforandroid/bootstraps/sdl2/__init__.py"
-          echo "Patched python-for-android"
-
       - name: Verify model exists
         run: |
           if [ ! -f traffic_lstm.tflite ]; then

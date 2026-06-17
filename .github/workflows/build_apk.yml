@@ -15,31 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Клонируем python-for-android и убираем libthorvg (на всякий случай)
-      - name: Patch python-for-android
-        run: |
-          P4A_DIR="/home/user/.buildozer/android/platform/python-for-android"
-          mkdir -p "$(dirname "$P4A_DIR")"
-          rm -rf "$P4A_DIR"
-          git clone --depth=1 --branch develop https://github.com/kivy/python-for-android.git "$P4A_DIR"
-          sed -i "s/'libthorvg',//g" "$P4A_DIR/pythonforandroid/bootstraps/sdl2/__init__.py"
-          echo "Patched successfully"
-
-      # Копируем модель в каталог проекта (если она не в корне)
-      - name: Ensure model is present
-        run: |
-          if [ ! -f traffic_lstm.tflite ]; then
-            echo "ERROR: traffic_lstm.tflite not found!"
-            exit 1
-          fi
-          ls -la
-
       - name: Build APK
         run: |
           echo y | buildozer -v android debug
         timeout-minutes: 120
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: traffic-predictor-lite-apk

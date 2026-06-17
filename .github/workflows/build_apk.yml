@@ -21,14 +21,12 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y python3-pip python3-dev git zip unzip openjdk-17-jdk \
-            autoconf libtool pkg-config zlib1g-dev libncurses-dev libncursesw-dev \
-            cmake libffi-dev libssl-dev
+            autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev
 
       - name: Install Buildozer
         run: |
           pip install --upgrade cython buildozer
 
-      # --- Ручное управление python-for-android ---
       - name: Clone python-for-android and remove libthorvg
         run: |
           P4A_DIR="$HOME/.buildozer/android/platform/python-for-android"
@@ -38,7 +36,6 @@ jobs:
           sed -i "s/'libthorvg',//g" "$P4A_DIR/pythonforandroid/bootstraps/sdl2/__init__.py"
           echo "Patched python-for-android"
 
-      # --- Проверяем наличие модели ---
       - name: Verify model exists
         run: |
           if [ ! -f traffic_lstm.tflite ]; then
